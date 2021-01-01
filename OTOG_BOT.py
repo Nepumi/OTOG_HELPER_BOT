@@ -18,7 +18,7 @@ PATH = os.path.dirname(__file__)
 INF = 999999999999999999999999
 
 Bot_Namae = "OTOG - One Tambon One Grader"
-DEB = ">>" #Before Command
+DEB = "" #Before Command
 if DEB != "":
 	Bot_Namae = "น้อวงตัวน้อยยย"
 
