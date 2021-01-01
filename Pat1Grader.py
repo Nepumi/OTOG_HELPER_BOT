@@ -4,28 +4,26 @@ import signal
 import os
 import time
 
-PATH = os.path.realpath(__file__)
-while PATH[-1] != "\\":
-	PATH = PATH[:-1]
+PATH = os.path.dirname(__file__)
 
 
 def Grading(namae):
 	Now_FILE = "VerifyCode\\" +namae + ".cpp"
 	Now_EXE = "VerifyCode\\" +namae + "RUN"
 
-	p = Popen(['g++', '-O2', PATH+Now_FILE,'-o', Now_EXE], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+	p = Popen(['g++', '-O2', os.path.join(PATH,Now_FILE),'-o', Now_EXE], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
 	(a,_) = p.communicate()
 	a = a.decode()
 	RET = p.returncode
 	if RET!= 0:
-		return "อ่อนหัด!! แค่นี้ก็ยัง ERROR\n" + a.replace(PATH,"..\\")
+		return "อ่อนหัด!! แค่นี้ก็ยัง ERROR\n" + a.replace(PATH,"..")
 
 	Verdict = ""
 	sumTime = 0
 	per = True
 	for i in range(1,10+1):
 		startTime = time.time()
-		p = Popen([PATH+Now_EXE], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+		p = Popen([os.path.join(PATH,Now_EXE)], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
 		try:
 			with open("Pat1TestCase\\" +str(i)+".in") as F:
 				OUT = p.communicate(timeout=2,input=F.read().encode())[0]

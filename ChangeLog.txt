@@ -1,0 +1,3 @@
+<:Karen:704257451104403568> **Beta 1.1** <:Karen:704257451104403568>
+<:Paimon_But_LooklikeAqua:763982004655095808> แก้คำสั่ง guess_num จากการเปลี่ยน API ของ Discord.py เอง :(
+:sparkles: เพิ่มคำสั่ง change_Log()

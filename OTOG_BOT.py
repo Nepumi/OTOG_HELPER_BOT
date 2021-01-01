@@ -11,26 +11,31 @@ from random import randint
 from urllib.request import Request, urlopen
 import Pat1Grader
 
-PATH = os.path.realpath(__file__)
-while PATH[-1] != "\\":
-	PATH = PATH[:-1]
+PATH = os.path.dirname(__file__)
+
 
 
 INF = 999999999999999999999999
 
 Bot_Namae = "OTOG - One Tambon One Grader"
-DEB = "" #Before Command
+DEB = ">>" #Before Command
 if DEB != "":
 	Bot_Namae = "น้อวงตัวน้อยยย"
 
-VER = "B10"
+VER = "B11"
 
 IsStart = False
 
-TOKEN = input("Tell me your TOKEN :) :")
-if TOKEN == "":
-	print("WTF MANN")
-	exit(1)
+if os.path.exists(os.path.join(PATH,"__TOKEN__.txt")):
+	with open(os.path.join(PATH,"__TOKEN__.txt")) as f:
+		TOKEN = f.read().strip()
+		print(f"Found __TOKEN__\n{TOKEN}\n")
+else:
+	TOKEN = input("Tell me your TOKEN :) :")
+	if TOKEN == "":
+		print("WTF MANN")
+		exit(1)
+	print("You can create file name '__TOKEN__.txt'\nand save with your *token*\nIn next you don't need to tell me your token :)")
 
 def Count_All_Task():
 	response = requests.get("https://otog.cf/api/countProblem")
@@ -41,9 +46,15 @@ def Count_All_Task():
 	return str(Con)
 
 def Getname(Client,Id,Guild = None):
+	Id = Id.strip()
 	if Guild== None:
 		return Client.get_user(int(Id)).name
 	else:
+		if Guild.get_member(int(Id)) == None:
+			if Client.get_user(int(Id)).name == None:
+				return "ใครไม่รู้ Discord ไม่บอก"
+			return Client.get_user(int(Id)).name
+
 		Mininame = Guild.get_member(int(Id)).nick
 		if Mininame != None:
 			return Client.get_user(int(Id)).name+"(AKA. "+Mininame+")"
@@ -497,7 +508,7 @@ class MyClient(discord.Client):
 				Medal = ":third_place:"
 
 			if MM["rank"] > 10:
-				EM.add_field(name = ":no_entry:และยังมีอีกหลายคน...",value = ":free:อยากรู้ก็เข้า otog.cf ไปเล้ย");
+				EM.add_field(name = ":no_entry:และยังมีอีกหลายคน...",value = ":free:อยากรู้ก็เข้า otog.cf ไปเล้ย")
 				break
 
 			EM.add_field(name = "**#{} {}[{}]{}**".format(MM["rank"],MM["sname"],MM["rating"],Medal),\
@@ -570,6 +581,7 @@ class MyClient(discord.Client):
 			em.add_field(name = ":person_playing_handball:task()",value = "จำนวนโจทย์ตอนนี้",inline=False)
 			em.add_field(name = ":military_medal:ranking()",value = "คำสั่งไว้ขิงกัน",inline=False)
 			em.add_field(name = ":question:question(<ชื่อโจทย์>) <คำถาม>",value = "ถามคำถามเกี่ยวกับโจทย์ <ชื่อโจทย์>\nและ<คำถาม>ควรตอบเป็น Yes/No(ใช่/ไม่ใช่)",inline=False)
+			em.add_field(name = ":wrench:change_Log()",value = "เป็นการตรวจสอบว่าบอทในรุ่นปัจจุบันมีอะไรเปลี่ยนแปลงบ้าง",inline=False)
 			em.add_field(name = ":musical_note:[OtogRadio] <ชื่อเพลง>",value = "ขอเพลงได้ๆๆ",inline=False)
 
 			await message.channel.send(content = None ,embed = em)
@@ -586,6 +598,7 @@ class MyClient(discord.Client):
 				em.add_field(name = ":1234:Version()",value = "ตรวจสอบ Version",inline=False)
 				em.add_field(name = ":loudspeaker:ann() <Text>",value = "ประกาศๆๆๆๆ",inline=False)
 				em.add_field(name = ":loudspeaker:say(<Channel_ID>) <Text>",value = "ส่ง <Text> ไปยังห้อง <Channel_ID>",inline=False)
+				em.add_field(name = ":eyes:read() <Text>",value = "เป็นการสั่งให้ตัว Console อ่าน <Text> แล้วทำการปริ้นออกมา",inline=False)
 				em.add_field(name = ":question:q_answer(<id>) <text>",value = "ตอบคำถามที่ <id> โดยคำถามจะหายด้วย",inline=False)
 				em.add_field(name = ":question:q_remove(<id>)",value = "ลบคำถามที่ <id>",inline=False)
 				em.add_field(name = ":question:q_clear()",value = "clear คำถามทั้งหมด(ต้องแน่ใจจริงๆว่าจะทำ)",inline=False)
@@ -767,6 +780,27 @@ class MyClient(discord.Client):
 			else:
 				await MESS.author.send("ตอนนี้เหลือโอกาสเพียง **"+str(5-Verify_User[namae])+"** ครั้งเท่านั้น")
 			self.sSave()
+
+		if message.content.lower().startswith(DEB+'change_log()'):
+			strChangeLog = ""
+			try:
+				if os.path.exists(os.path.join(PATH,"ChangeLog.txt")):
+					with open(os.path.join(PATH,"ChangeLog.txt"),"r",encoding='utf8') as f:
+						strChangeLog += f.read()
+				
+				if Is_Admin and os.path.exists(os.path.join(PATH,"ChangeLogAdmin.txt")):
+					with open(os.path.join(PATH,"ChangeLogAdmin.txt"),"r",encoding='utf8') as f:
+						strChangeLog += "\n\n<:JerryEh:704310359322001499> ***สำหรับ ADMIN*** <:JerryEh:704310359322001499>\n"
+						strChangeLog += f.read()
+			except:
+				pass
+
+			
+			if len(strChangeLog.strip()) == 0:
+				await message.channel.send("ไม่บอกหรอก อิอิ")
+			else:
+				await message.channel.send(strChangeLog)
+			
 
 
 
@@ -963,6 +997,17 @@ class MyClient(discord.Client):
 
 				else:
 					await channel.send(":loudspeaker:@everyone:loudspeaker:\n"+Mes_Str)
+
+				await message.delete()
+			
+
+			if message.content.lower().startswith(DEB+'read()'):
+
+				Mes_Str = message.content[len(DEB+'read()')+1:]
+
+				print("------------Read Message-----------")
+				print(Mes_Str)
+				print("-----------------------------------")
 
 				await message.delete()
 
@@ -1339,4 +1384,10 @@ class MyClient(discord.Client):
 
 
 client = MyClient()
-client.run(TOKEN)
+
+try:
+	client.run(TOKEN)
+except:
+	print(f"Wrong Token or Fucked up\nhere is token:{TOKEN}")
+	exit(1)
+
